@@ -1,0 +1,131 @@
+# This is the configuration for Porter
+# You must define steps for each action, but the rest is optional
+# See https://porter.sh/authoring-bundles for documentation on how to configure your bundle
+# Uncomment out the sections below to take full advantage of what Porter can do!
+
+name: rudr-install
+version: 0.3.1
+description: "This bundle uses Helm 3 to install rudr on a Kubernetes cluster using the official helm chart. For more information on rudr and the open application model, see https://openappmodel.io/ and https://github.com/oam-dev/rudr/. The uninstall action removes both CRDs and the Helm 3 release; instead, use invoke --action com.oamdev.rudr.delete-release to delete the release only."
+invocationImage: squillace/rudr-install:latest
+tag: squillace/rudr-install-cnab:latest
+
+# Uncomment out the line below to use a template Dockerfile for your invocation image
+#dockerfile: Dockerfile.tmpl
+
+mixins:
+  - exec
+  - kubernetes
+  - helm3
+
+credentials:
+  - name: KUBE_CONFIG
+    path: /root/.kube/config
+    description: "Specify the file path to the kube config file to use to access the target cluster."
+
+parameters:
+  - name: HELM_RELEASE
+    type: string
+    default: "rudr"
+    description: "Use to specify a different Helm 3 release name."
+  - name: RUDR_IMAGE_VERSION
+    type: string
+    default: "v1.0.0-alpha.1"
+    description: "The rudr container image version chosen from https://hub.docker.com/r/oamdev/rudr/tags."
+
+customActions:
+  com.oamdev.rudr.delete-release:
+    description: "Deletes the Helm 3 release for the rudr installation."
+    stateless: false
+    modifies: true
+  com.oamdev.rudr.delete-crds:
+    description: "Deletes the CRDs remaining from a rudr installation."
+    stateless: false
+    modifies: true
+
+images:
+  rudr-stable:
+      description: "Full basic installation of Rudr stable"
+      imageType: "docker"
+      repository: "oamdev/rudr"
+      digest: "sha256:59df102b6c2f63b2e712f407836c0019d7310daa681556963662eec1663f1ab5"
+  rudr-latest:
+      description: "Full basic installation of Rudr unstable"
+      imageType: "docker"
+      repository: "oamdev/rudr"
+      digest: "sha256:0b42fbe9806729dbfeaf693a5f541b2f7c469d0debb9b3f3c6128a7ef4722405"      
+
+install:
+  - helm3:
+      description: "Deploy rudr using Helm 3...."
+      arguments:
+        - install
+        - "{{bundle.parameters.HELM_RELEASE}}"
+        - rudr
+        - --wait 
+        - --set 
+        - image.digest="{{bundle.images.rudr-stable.digest}}"
+        - --set
+        - image.repository="{{bundle.images.rudr-stable.repository}}"
+upgrade:
+  - helm3:
+      description: "Upgrade/--install rudr using the \"latest\" image tag."
+      arguments:
+        - upgrade
+        - --install
+        - "{{bundle.parameters.HELM_RELEASE}}"
+        - rudr
+        - --set
+        - image.repository="{{bundle.images.rudr-latest.repository}}"
+        - --set 
+        - image.digest="{{bundle.images.rudr-latest.digest}}"
+
+uninstall:
+  - exec:
+      description: "Please use com.oamdev.rudr.delete-release to delete the release, and com.oamdev.rudr.delete-crds to delete the CRDs."
+      command: bash
+      flags:
+        c: echo "Deleting both the Helm 3 release and the rudr CRDs..."
+  - helm3:
+      description: "Uninstall rudr release using Helm 3...."
+      arguments:
+        - delete
+        - "{{bundle.parameters.HELM_RELEASE}}"
+  - exec:
+      command: kubectl
+      description: "Results in the deletion of the remaining oam.dev crds. (Invokes \"kubectl delete crd -l app.kubernetes.io/part-of=core.oam.dev\")"
+      arguments:
+        - delete 
+        - crd
+      flags:
+        l: app.kubernetes.io/part-of=core.oam.dev
+
+
+com.oamdev.rudr.delete-crds:
+  - exec:
+      command: kubectl
+      description: "Results in the deletion of the remaining oam.dev crds. (Invokes \"kubectl delete crd -l app.kubernetes.io/part-of=core.oam.dev\")"
+      arguments:
+        - delete 
+        - crd
+      flags:
+        l: app.kubernetes.io/part-of=core.oam.dev
+
+com.oamdev.rudr.delete-release:
+  - helm3:
+      description: "Uninstall rudr release using Helm 3...."
+      arguments:
+        - delete
+        - "{{bundle.parameters.HELM_RELEASE}}"
+
+
+# See https://porter.sh/authoring-bundles/#dependencies
+#dependencies:
+#  mysql:
+#    tag: deislabs/porter-mysql:latest
+#    parameters:
+#      database-name: wordpress
+
+# See https://porter.sh/wiring/#credentials
+#credentials:
+#  - name: kubeconfig
+#    path: /root/.kube/config
