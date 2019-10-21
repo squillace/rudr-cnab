@@ -9,7 +9,7 @@ image:
   repository: oamdev/rudr
   tag: latest # We're in pre-release
   pullPolicy: Always
-  digest: ""
+  digest: 
 
 # Turning this off will omit the Role and RoleBinding declarations.
 enableRBAC: true

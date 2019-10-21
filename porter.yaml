@@ -25,12 +25,12 @@ credentials:
 parameters:
   - name: HELM_RELEASE
     type: string
-    default: "rudr"
+    default: rudr
     description: "Use to specify a different Helm 3 release name."
   - name: RUDR_IMAGE_VERSION
     type: string
-    default: "v1.0.0-alpha.1"
-    description: "The rudr container image version chosen from https://hub.docker.com/r/oamdev/rudr/tags."
+    default: v1.0.0-alpha.1
+    description: "The rudr container image version chosen from https://hub.docker.com/r/oamdev/rudr/ tags."
 
 customActions:
   com.oamdev.rudr.delete-release:
