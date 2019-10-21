@@ -58,7 +58,8 @@ install:
   - helm3:
       description: "Deploy rudr using Helm 3...."
       arguments:
-        - install
+        - upgrade
+        - --install
         - "{{bundle.parameters.HELM_RELEASE}}"
         - rudr
         - --wait 
@@ -66,6 +67,7 @@ install:
         - image.digest="{{bundle.images.rudr-stable.digest}}"
         - --set
         - image.repository="{{bundle.images.rudr-stable.repository}}"
+
 upgrade:
   - helm3:
       description: "Upgrade/--install rudr using the \"latest\" image tag."
@@ -78,6 +80,7 @@ upgrade:
         - image.repository="{{bundle.images.rudr-latest.repository}}"
         - --set 
         - image.digest="{{bundle.images.rudr-latest.digest}}"
+
 
 uninstall:
   - exec:
