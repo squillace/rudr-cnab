@@ -52,7 +52,7 @@ images:
       description: "Full basic installation of Rudr unstable"
       imageType: "docker"
       repository: "oamdev/rudr"
-      digest: "sha256:0b42fbe9806729dbfeaf693a5f541b2f7c469d0debb9b3f3c6128a7ef4722405"      
+      digest: "sha256:599b1b2a94a2ec3eb0ec1773e2c83dabbdcd4595f82f6d1d5ce9f97655c70733"      
 
 install:
   - helm3:
