@@ -6,8 +6,8 @@
 name: rudr-install
 version: 0.3.1
 description: "This bundle uses Helm 3 to install rudr on a Kubernetes cluster using the official helm chart. For more information on rudr and the open application model, see https://openappmodel.io/ and https://github.com/oam-dev/rudr/. The uninstall action removes both CRDs and the Helm 3 release; instead, use invoke --action com.oamdev.rudr.delete-release to delete the release only."
-invocationImage: squillace/rudr-install:latest
-tag: squillace/rudr-install-cnab:latest
+invocationImage: squillace/rudr-install:v0.1.0
+tag: squillace/rudr-install-cnab:v0.1.0
 
 # Uncomment out the line below to use a template Dockerfile for your invocation image
 #dockerfile: Dockerfile.tmpl
@@ -56,7 +56,7 @@ images:
 
 install:
   - helm3:
-      description: "Deploy rudr using Helm 3...."
+      description: "Deploy rudr using Helm 3. This performs an upgrade --install, ensuring a complete installation with this chart."
       arguments:
         - upgrade
         - --install
@@ -84,10 +84,10 @@ upgrade:
 
 uninstall:
   - exec:
-      description: "Please use com.oamdev.rudr.delete-release to delete the release, and com.oamdev.rudr.delete-crds to delete the CRDs."
+      description: "Destroys both CRDs and Helm3 releases."
       command: bash
       flags:
-        c: echo "Deleting both the Helm 3 release and the rudr CRDs..."
+        c: echo "To remove the release but leave the CRDs, use the com.oamdev.rudr.delete-release action."
   - helm3:
       description: "Uninstall rudr release using Helm 3...."
       arguments:
