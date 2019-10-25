@@ -6,8 +6,8 @@
 name: rudr-install
 version: 0.4
 description: "This bundle uses Helm 3 to install rudr on a Kubernetes cluster using the official helm chart. For more information on rudr and the open application model, see https://openappmodel.io/ and https://github.com/oam-dev/rudr/. The uninstall action removes both CRDs and the Helm 3 release; instead, use invoke --action com.oamdev.rudr.delete-release to delete the release only."
-invocationImage: squillace/rudr-install:v0.1.0
-tag: squillace/rudr-install-cnab:v0.1.0
+invocationImage: squillace/rudr-install:v0.4
+tag: squillace/rudr-install-cnab:v0.4
 
 # Uncomment out the line below to use a template Dockerfile for your invocation image
 #dockerfile: Dockerfile.tmpl
