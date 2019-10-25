@@ -4,7 +4,7 @@
 # Uncomment out the sections below to take full advantage of what Porter can do!
 
 name: rudr-install
-version: 0.3.1
+version: 0.4
 description: "This bundle uses Helm 3 to install rudr on a Kubernetes cluster using the official helm chart. For more information on rudr and the open application model, see https://openappmodel.io/ and https://github.com/oam-dev/rudr/. The uninstall action removes both CRDs and the Helm 3 release; instead, use invoke --action com.oamdev.rudr.delete-release to delete the release only."
 invocationImage: squillace/rudr-install:latest
 tag: squillace/rudr-install-cnab:latest
