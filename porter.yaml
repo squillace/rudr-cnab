@@ -4,10 +4,10 @@
 # Uncomment out the sections below to take full advantage of what Porter can do!
 
 name: rudr-cnab
-version: 0.4.1
+version: 0.5.0
 description: "This bundle uses Helm 3 to install rudr on a Kubernetes cluster using the official helm chart. For more information on rudr and the open application model, see https://openappmodel.io/ and https://github.com/oam-dev/rudr/. The uninstall action removes both CRDs and the Helm 3 release; instead, use invoke --action com.oamdev.rudr.delete-release to delete the release only."
-invocationImage: squillace/rudr-install:v0.4.1
-tag: squillace/rudr-cnab:v0.4.1
+invocationImage: squillace/rudr-install:v0.5.0
+tag: squillace/rudr-cnab:v0.5.0
 
 # Uncomment out the line below to use a template Dockerfile for your invocation image
 #dockerfile: Dockerfile.tmpl
@@ -52,9 +52,20 @@ images:
       description: "Full basic installation of Rudr unstable"
       imageType: "docker"
       repository: "oamdev/rudr"
-      digest: "sha256:599b1b2a94a2ec3eb0ec1773e2c83dabbdcd4595f82f6d1d5ce9f97655c70733"      
+      digest: "sha256:4472dd98a101e1bea5bd20b9772940db008ba487491a8a082f757ad83352d6b2"         
+  healthscope-latest:
+      description: "Installation of healthscope image latest."
+      imageType: "docker"
+      repository: "oamdev/healthscope"
+      digest: "sha256:4c7d7e9ae710e3450cd5068b8dabeea35fe3b293d184439555032eb27f82546f"
+
 
 install:
+  - exec:
+      command: bash
+      description: "Creating the keda namespace..."
+      arguments:
+        - "createKedaNs.sh"
   - helm3:
       description: "Deploy rudr using Helm 3. This performs an upgrade --install, ensuring a complete installation with this chart."
       arguments:
@@ -67,6 +78,10 @@ install:
         - image.digest="{{bundle.images.rudr-stable.digest}}"
         - --set
         - image.repository="{{bundle.images.rudr-stable.repository}}"
+#        - --set
+#        - image.digest="{{bundle.images.healthscope-latest.digest}}"
+#        - --set 
+#        - image.repository="{{bundle.images.healthscope-latest.repository}}"
 
 upgrade:
   - helm3:
@@ -85,7 +100,7 @@ upgrade:
 uninstall:
   - exec:
       description: "Destroys both CRDs and Helm3 releases."
-      command: bash
+      command: sh
       flags:
         c: echo "To remove the release but leave the CRDs, use the com.oamdev.rudr.delete-release action."
   - helm3:
@@ -101,6 +116,12 @@ uninstall:
         - crd
       flags:
         l: app.kubernetes.io/part-of=core.oam.dev
+
+  - exec:
+      command: bash
+      description: "Clean up instructions:"
+      flags:
+        c: echo "This bundle ensured that the 'keda' namespace existed, but uninstall does not delete it. If it is unused, be sure to clean up any leftover namespaces."
 
 
 com.oamdev.rudr.delete-crds:
