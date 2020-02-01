@@ -23,22 +23,30 @@ credentials:
     description: "Specify the file path to the kube config file to use to access the target cluster."
 
 parameters:
-  - name: HELM_RELEASE
+  - name: RUDR_HELM_RELEASE
     type: string
     default: rudr
-    description: "Use to specify a different Helm 3 release name."
+    description: "Use to specify a different Helm 3 release name. Default is 'rudr'."
+  - name: HEALTH_SCOPE_HELM_RELEASE
+    type: string
+    default: healthscope
+    description: "Use to specify a different Helm 3 release name. Default is 'healthscope'."
   - name: RUDR_IMAGE_VERSION
     type: string
     default: v1.0.0-alpha.1
     description: "The rudr container image version chosen from https://hub.docker.com/r/oamdev/rudr/ tags."
 
 customActions:
-  com.oamdev.rudr.delete-release:
+  oamdev.rudr.delete-release:
     description: "Deletes the Helm 3 release for the rudr installation."
     stateless: false
     modifies: true
-  com.oamdev.rudr.delete-crds:
+  oamdev.rudr.delete-crds:
     description: "Deletes the CRDs remaining from a rudr installation."
+    stateless: false
+    modifies: true
+  oamdev.healthscope.install:
+    description: "Installs the healthscope controller: https://github.com/oam-dev/rudr/tree/master/healthscope."
     stateless: false
     modifies: true
 
@@ -71,7 +79,7 @@ install:
       arguments:
         - upgrade
         - --install
-        - "{{bundle.parameters.HELM_RELEASE}}"
+        - "{{bundle.parameters.RUDR_HELM_RELEASE}}"
         - rudr
         - --wait 
         - --set 
@@ -89,7 +97,7 @@ upgrade:
       arguments:
         - upgrade
         - --install
-        - "{{bundle.parameters.HELM_RELEASE}}"
+        - "{{bundle.parameters.RUDR_HELM_RELEASE}}"
         - rudr
         - --set
         - image.repository="{{bundle.images.rudr-latest.repository}}"
@@ -107,7 +115,7 @@ uninstall:
       description: "Uninstall rudr release using Helm 3...."
       arguments:
         - delete
-        - "{{bundle.parameters.HELM_RELEASE}}"
+        - "{{bundle.parameters.RUDR_HELM_RELEASE}}"
   - exec:
       command: kubectl
       description: "Results in the deletion of the remaining oam.dev crds. (Invokes \"kubectl delete crd -l app.kubernetes.io/part-of=core.oam.dev\")"
@@ -124,7 +132,7 @@ uninstall:
         c: echo "This bundle ensured that the 'keda' namespace existed, but uninstall does not delete it. If it is unused, be sure to clean up any leftover namespaces."
 
 
-com.oamdev.rudr.delete-crds:
+oamdev.rudr.delete-crds:
   - exec:
       command: kubectl
       description: "Results in the deletion of the remaining oam.dev crds. (Invokes \"kubectl delete crd -l app.kubernetes.io/part-of=core.oam.dev\")"
@@ -134,13 +142,32 @@ com.oamdev.rudr.delete-crds:
       flags:
         l: app.kubernetes.io/part-of=core.oam.dev
 
-com.oamdev.rudr.delete-release:
+oamdev.rudr.delete-release:
   - helm3:
       description: "Uninstall rudr release using Helm 3...."
       arguments:
         - delete
-        - "{{bundle.parameters.HELM_RELEASE}}"
+        - "{{bundle.parameters.RUDR_HELM_RELEASE}}"
 
+oamdev.healthscope.install:
+  - helm3:
+      description: "Installing the healthscope controller from https://github.com/oam-dev/rudr/tree/master/healthscope."
+      arguments:
+        - upgrade
+        - --install
+        - "{{bundle.parameters.HEALTH_SCOPE_HELM_RELEASE}}"
+        - healthscope
+        - --wait 
+        - --set
+        - image.digest="{{bundle.images.healthscope-latest.digest}}"
+        - --set 
+        - image.repository="{{bundle.images.healthscope-latest.repository}}"
+oamdev.healthscope.uninstall:
+  - helm3:
+      description: "Removes the healthscope controller from https://github.com/oam-dev/rudr/tree/master/healthscope."
+      arguments:
+        - delete
+        - "{{bundle.parameters.HEALTH_SCOPE_HELM_RELEASE}}"
 
 # See https://porter.sh/authoring-bundles/#dependencies
 #dependencies:
